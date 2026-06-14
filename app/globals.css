@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+/* CircuitCalc HQ ships a single, intentional LIGHT theme — every surface uses
+   explicit Tailwind colors (bg-slate-50, white cards, text-slate-900). We do NOT
+   honour prefers-color-scheme: a dark body background would sit behind the
+   light-theme text and make it unreadable. Background/colour are left to the
+   layout's Tailwind utilities. */
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+}
