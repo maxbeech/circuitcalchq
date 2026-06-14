@@ -72,6 +72,16 @@ t("sizeWire: 20A load Cu 60°C → 12 AWG capped at 20A (240.4(D))", () => {
   assert.equal(r.size, "12");
   assert.equal(r.ocpd, 20);
 });
+t("sizeWire 50A: 60°C → 6 Cu / 4 Al; 75°C → 8 Cu / 6 Al (110.14(C))", () => {
+  assert.equal(sizeWire({ loadAmps: 50, material: "cu", tempRating: 60 }).size, "6");
+  assert.equal(sizeWire({ loadAmps: 50, material: "al", tempRating: 60 }).size, "4");
+  assert.equal(sizeWire({ loadAmps: 50, material: "cu", tempRating: 75 }).size, "8");
+  assert.equal(sizeWire({ loadAmps: 50, material: "al", tempRating: 75 }).size, "6");
+});
+t("sizeWire 100A: 75°C → 3 Cu / 1 Al", () => {
+  assert.equal(sizeWire({ loadAmps: 100, material: "cu", tempRating: 75 }).size, "3");
+  assert.equal(sizeWire({ loadAmps: 100, material: "al", tempRating: 75 }).size, "1");
+});
 t("ampacity derated: 6 Cu 75°C @40°C ambient = 57.2", () => near(ampacity("6", "cu", 75, 40, 3), 57.2, 0.1));
 t("ampacity derated: 6 Cu 90°C, 6 CCC = 60", () => near(ampacity("6", "cu", 90, 30, 6), 60, 0.1));
 

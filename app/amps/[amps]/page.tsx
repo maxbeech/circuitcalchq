@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { sizeLabel } from "@/lib/nec-conductors";
+import { sizeLabel, type Material, type TempRating } from "@/lib/nec-conductors";
 import { sizeWire } from "@/lib/wire-size";
 import { AMP_TARGETS } from "@/lib/wire-pages";
 import { SITE } from "@/lib/site";
@@ -17,9 +17,13 @@ export async function generateMetadata({ params }: { params: Promise<{ amps: str
   if (!AMP_TARGETS.includes(n)) return {};
   return {
     title: `What Size Wire for ${n} Amps? (NEC Copper & Aluminum)`,
-    description: `The correct copper and aluminum wire size for a ${n} amp circuit per NEC Table 310.16, plus the breaker and ground wire.`,
+    description: `The correct copper and aluminum wire size for a ${n} amp circuit per NEC Table 310.16 — at both 60°C and 75°C terminals — plus the breaker and ground wire.`,
     alternates: { canonical: `${SITE.url}/amps/${n}` },
   };
+}
+
+function wire(n: number, material: Material, temp: TempRating) {
+  return sizeWire({ loadAmps: n, material, tempRating: temp }).size;
 }
 
 export default async function AmpPage({ params }: { params: Promise<{ amps: string }> }) {
@@ -27,8 +31,15 @@ export default async function AmpPage({ params }: { params: Promise<{ amps: stri
   const n = Number(amps);
   if (!AMP_TARGETS.includes(n)) notFound();
 
-  const cu = sizeWire({ loadAmps: n, material: "cu", tempRating: 75 });
-  const al = sizeWire({ loadAmps: n, material: "al", tempRating: 75 });
+  // The NEC default column is 60°C for circuits ≤100 A (110.14(C)(1)); 75°C is
+  // permitted when the terminals and conductors are rated for it.
+  const defaultCol: TempRating = n <= 100 ? 60 : 75;
+  const headline = sizeWire({ loadAmps: n, material: "cu", tempRating: defaultCol });
+
+  const rows: { m: string; mat: Material }[] = [
+    { m: "Copper", mat: "cu" },
+    { m: "Aluminum", mat: "al" },
+  ];
 
   return (
     <>
@@ -39,33 +50,46 @@ export default async function AmpPage({ params }: { params: Promise<{ amps: stri
       </nav>
       <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">What size wire for {n} amps?</h1>
       <p className="mt-2 max-w-2xl text-slate-600">
-        On standard 75°C terminals, a {n} A circuit needs{" "}
-        <strong>{cu.size ? `${sizeLabel(cu.size)} copper` : "a parallel run"}</strong>
-        {al.size && <> or <strong>{sizeLabel(al.size)} aluminum</strong></>}. The values below come straight
-        from NEC Table 310.16, with the breaker from 240.6(A) and the ground from Table 250.122.
+        A {n} A circuit needs <strong>{headline.size ? `${sizeLabel(headline.size)} copper` : "a parallel run"}</strong>{" "}
+        on {defaultCol}°C-rated terminals
+        {n <= 100 && <> — the NEC default for circuits 100 A and under (110.14(C)(1))</>}. The full table below
+        shows both terminal ratings, from NEC Table 310.16, with the breaker (240.6(A)) and ground (Table 250.122).
       </p>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        {[{ m: "Copper", r: cu }, { m: "Aluminum", r: al }].map(({ m, r }) => (
-          <ResultCard key={m}>
-            <div className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">{m}</div>
-            {r.size ? (
-              <div className="grid grid-cols-2 gap-4">
-                <Stat label="Wire size" value={sizeLabel(r.size)} big />
-                <Stat label="Breaker" value={`${r.ocpd} A`} big />
-                <Stat label="Ampacity" value={`${r.ampacity} A`} sub="at 75°C, 30°C ambient" />
-                <Stat label="Ground (250.122)" value={sizeLabel(r.egc!)} />
-              </div>
-            ) : (
-              <p className="text-sm text-slate-500">{r.note}</p>
-            )}
-          </ResultCard>
-        ))}
-      </div>
+      <ResultCard>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-200 text-left text-slate-500">
+                <th className="px-3 py-2 font-semibold">Conductor</th>
+                <th className="px-3 py-2 font-semibold">60°C terminals</th>
+                <th className="px-3 py-2 font-semibold">75°C terminals</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map(({ m, mat }) => {
+                const c60 = wire(n, mat, 60);
+                const c75 = wire(n, mat, 75);
+                return (
+                  <tr key={m} className="border-b border-slate-100 last:border-0">
+                    <td className="px-3 py-2 font-medium text-slate-900">{m}</td>
+                    <td className="px-3 py-2 text-slate-700">{c60 ? sizeLabel(c60) : "parallel run"}</td>
+                    <td className="px-3 py-2 text-slate-700">{c75 ? sizeLabel(c75) : "parallel run"}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-4 border-t border-slate-100 pt-4">
+          <Stat label="Breaker / fuse" value={`${headline.ocpd ?? n} A`} />
+          <Stat label="Ground (250.122)" value={headline.egc ? sizeLabel(headline.egc) : "—"} />
+        </div>
+      </ResultCard>
 
       <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-        These are the minimum sizes by ampacity at a 30°C ambient. On long runs, voltage drop can force a
-        larger conductor — check yours with the{" "}
+        These are minimum sizes by ampacity at a 30°C ambient. On long runs, voltage drop can force a larger
+        conductor — check yours with the{" "}
         <Link href="/calculators/voltage-drop-calculator" className="font-medium underline">voltage drop calculator</Link>.
         In hot or crowded raceways, derate with the{" "}
         <Link href="/calculators/wire-size-calculator" className="font-medium underline">wire size calculator</Link>.
