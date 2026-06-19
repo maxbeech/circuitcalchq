@@ -20,12 +20,12 @@ export const viewport: Viewport = {
 function Header() {
   return (
     <header className="border-b border-slate-200 bg-white/80 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-3">
+      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-5">
         <Link href="/" className="flex items-center gap-2 font-bold text-slate-900">
           <span className="grid h-7 w-7 place-items-center rounded-lg bg-blue-600 text-sm text-white">⚡</span>
           CircuitCalc<span className="text-blue-600">HQ</span>
         </Link>
-        <nav className="flex items-center gap-5 text-sm text-slate-600">
+        <nav className="flex items-center gap-4 text-sm text-slate-600 sm:gap-5">
           <Link href="/calculators" className="hover:text-slate-900">Calculators</Link>
           <Link href="/wire" className="hidden hover:text-slate-900 sm:inline">Wire sizes</Link>
           <Link href="/blog" className="hover:text-slate-900">Guides</Link>
