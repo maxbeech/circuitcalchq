@@ -7,6 +7,7 @@ import { ampacity, sizeWire } from "../lib/wire-size.ts";
 import { calcFill, conductorArea, minConduit } from "../lib/conduit-fill.ts";
 import { calcBoxFill } from "../lib/box-fill.ts";
 import { calcDwellingLoad, rangeDemandVa } from "../lib/dwelling-load.ts";
+import { solveOhms, solvePower, phaseFactor } from "../lib/power.ts";
 
 let pass = 0;
 let fail = 0;
@@ -137,6 +138,48 @@ t("EGC: 15A→14, 20A→12, 100A→8, 200A→6 (Cu)", () => {
   assert.equal(egcSize(100, "cu"), "8");
   assert.equal(egcSize(200, "cu"), "6");
 });
+
+// ---- Ohm's law ----
+t("Ohm: V=120, R=60 → I=2, P=240", () => {
+  const r = solveOhms({ v: 120, r: 60 });
+  assert.ok(r.valid); near(r.i, 2); near(r.p, 240);
+});
+t("Ohm: I=2, R=60 → V=120, P=240", () => {
+  const r = solveOhms({ i: 2, r: 60 });
+  near(r.v, 120); near(r.p, 240);
+});
+t("Ohm: R=60, P=240 → I=2, V=120", () => {
+  const r = solveOhms({ r: 60, p: 240 });
+  near(r.i, 2); near(r.v, 120);
+});
+t("Ohm: needs exactly 2 knowns", () => {
+  assert.equal(solveOhms({ v: 120 }).valid, false);
+  assert.equal(solveOhms({ v: 120, i: 2, r: 60 }).valid, false);
+});
+
+// ---- Power conversions ----
+t("phaseFactor: 3φ=√3, 1φ=1, dc=1", () => {
+  near(phaseFactor("3"), Math.sqrt(3), 0.001);
+  assert.equal(phaseFactor("1"), 1);
+  assert.equal(phaseFactor("dc"), 1);
+});
+t("Power 1φ: 240V, 10A, pf1 → 2400 W, 2.4 kVA", () => {
+  const r = solvePower({ mode: "1", volts: 240, pf: 1, source: "amps", value: 10 });
+  near(r.watts, 2400, 1); near(r.kva, 2.4, 0.01);
+});
+t("Power 1φ watts→amps: 120V, 1200W, pf1 → 10 A", () => {
+  const r = solvePower({ mode: "1", volts: 120, pf: 1, source: "watts", value: 1200 });
+  near(r.amps, 10, 0.01);
+});
+t("Power 3φ: 480V, 100A, pf0.9 → ~74825 W, 83.14 kVA", () => {
+  const r = solvePower({ mode: "3", volts: 480, pf: 0.9, source: "amps", value: 100 });
+  near(r.watts, 74824.6, 5); near(r.kva, 83.14, 0.05);
+});
+t("Power DC forces pf=1: 12V, 10A → 120 W", () => {
+  const r = solvePower({ mode: "dc", volts: 12, pf: 0.5, source: "amps", value: 10 });
+  near(r.watts, 120, 0.1); assert.equal(r.pf, 1);
+});
+t("Power invalid when volts=0", () => assert.equal(solvePower({ mode: "1", volts: 0, pf: 1, source: "amps", value: 10 }).valid, false));
 
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail > 0) process.exit(1);

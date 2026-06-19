@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CONDUCTORS, getConductor, sizeLabel } from "@/lib/nec-conductors";
 import { GAUGE_USE, gaugeFromSlug, gaugeSlug } from "@/lib/wire-pages";
-import { SITE } from "@/lib/site";
+import { SITE, breadcrumbLd } from "@/lib/site";
 import { ResultCard, Stat } from "@/components/ui";
 
 export function generateStaticParams() {
@@ -19,6 +19,11 @@ export async function generateMetadata({ params }: { params: Promise<{ gauge: st
     title: `${label} Wire — Ampacity, Resistance & Uses (NEC)`,
     description: `${label} conductor: NEC Table 310.16 ampacity (${c.amp.cu[1]} A copper, 75°C), resistance ${c.ohm.cu} Ω/kft, ${c.cmil.toLocaleString()} circular mils, and what it's used for.`,
     alternates: { canonical: `${SITE.url}/wire/${gauge}` },
+    openGraph: {
+      title: `${label} Wire — Ampacity, Resistance & Uses`,
+      description: `${label}: NEC ampacity ${c.amp.cu[1]} A copper @75°C, resistance ${c.ohm.cu} Ω/kft.`,
+      url: `${SITE.url}/wire/${gauge}`,
+    },
   };
 }
 
@@ -30,8 +35,14 @@ export default async function GaugePage({ params }: { params: Promise<{ gauge: s
   const idx = CONDUCTORS.indexOf(c);
   const neighbours = [CONDUCTORS[idx - 1], CONDUCTORS[idx + 1]].filter(Boolean);
 
+  const crumbLd = breadcrumbLd([
+    { name: "Wire sizes", path: "/wire" },
+    { name: label, path: `/wire/${gauge}` },
+  ]);
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbLd) }} />
       <nav className="mb-4 text-sm text-slate-500">
         <Link href="/wire" className="hover:text-slate-900">Wire sizes</Link>
         <span className="mx-2">/</span>
@@ -45,7 +56,7 @@ export default async function GaugePage({ params }: { params: Promise<{ gauge: s
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <ResultCard>
-          <div className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">Ampacity (NEC 310.16)</div>
+          <div className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Ampacity (NEC 310.16)</div>
           <div className="grid grid-cols-3 gap-3 text-center">
             <Stat label="Cu 60°C" value={c.amp.cu[0]} />
             <Stat label="Cu 75°C" value={c.amp.cu[1]} />
@@ -56,7 +67,7 @@ export default async function GaugePage({ params }: { params: Promise<{ gauge: s
           </div>
         </ResultCard>
         <ResultCard>
-          <div className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">Properties (NEC Ch. 9, Table 8)</div>
+          <div className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Properties (NEC Ch. 9, Table 8)</div>
           <div className="grid grid-cols-2 gap-4">
             <Stat label="Circular mils" value={c.cmil.toLocaleString()} />
             <Stat label="THHN area" value={`${c.thhn} in²`} />

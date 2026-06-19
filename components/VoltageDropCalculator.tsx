@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { CONDUCTORS, sizeLabel, type Material } from "@/lib/nec-conductors";
 import { calcVoltageDrop, type Phase } from "@/lib/voltage-drop";
-import { Field, NumberInput, ResultCard, SegButton, Select, Stat, Verdict } from "./ui";
+import { Field, Notice, NumberInput, parseNum, ResultCard, SegButton, Select, Stat, Verdict } from "./ui";
 
 export default function VoltageDropCalculator() {
   const [material, setMaterial] = useState<Material>("cu");
@@ -34,13 +34,13 @@ export default function VoltageDropCalculator() {
           </div>
         </div>
         <Field label="System voltage (V)">
-          <NumberInput value={voltage} onChange={(e) => setVoltage(+e.target.value)} />
+          <NumberInput min={0} value={voltage} onChange={(e) => setVoltage(Math.max(0, parseNum(e.target.value)))} />
         </Field>
         <Field label="Load current (A)">
-          <NumberInput value={amps} onChange={(e) => setAmps(+e.target.value)} />
+          <NumberInput min={0} value={amps} onChange={(e) => setAmps(Math.max(0, parseNum(e.target.value)))} />
         </Field>
         <Field label="One-way distance (ft)" hint="The length of the run, not there-and-back.">
-          <NumberInput value={length} onChange={(e) => setLength(+e.target.value)} />
+          <NumberInput min={0} value={length} onChange={(e) => setLength(Math.max(0, parseNum(e.target.value)))} />
         </Field>
         <Field label="Conductor size">
           <Select value={size} onChange={(e) => setSize(e.target.value)}>
@@ -59,22 +59,29 @@ export default function VoltageDropCalculator() {
       </div>
 
       <ResultCard>
-        <div className="grid grid-cols-2 gap-4">
-          <Stat label="Voltage drop" value={`${r.vd} V`} big />
-          <Stat label="Percentage" value={`${r.vdPercent}%`} big />
-          <Stat label="Voltage at load" value={`${r.vEnd} V`} />
-          <Stat label="Conductor R" value={`${r.resistance} Ω/kft`} sub="NEC Ch. 9, Table 8" />
-        </div>
-        <div className="mt-4">
-          <Verdict ok={r.ok}>
-            {r.ok
-              ? `Within your ${target}% target.`
-              : `Exceeds ${target}%${r.recommended ? ` — upsize to ${sizeLabel(r.recommended)}` : ""}.`}
-          </Verdict>
-        </div>
+        {voltage > 0 && amps > 0 && length > 0 ? (
+          <>
+            <div className="grid grid-cols-2 gap-4">
+              <Stat label="Voltage drop" value={`${r.vd} V`} big />
+              <Stat label="Percentage" value={`${r.vdPercent}%`} big />
+              <Stat label="Voltage at load" value={`${r.vEnd} V`} />
+              <Stat label="Conductor R" value={`${r.resistance} Ω/kft`} sub="NEC Ch. 9, Table 8" />
+            </div>
+            <div className="mt-4">
+              <Verdict ok={r.ok}>
+                {r.ok
+                  ? `Within your ${target}% target.`
+                  : `Exceeds ${target}%${r.recommended ? ` — upsize to ${sizeLabel(r.recommended)}` : ""}.`}
+              </Verdict>
+            </div>
+          </>
+        ) : (
+          <Notice>Enter a positive voltage, current and distance to see the voltage drop.</Notice>
+        )}
         <p className="mt-4 text-xs text-slate-500">
           {phase === "3" ? "Three-phase: Vd = √3 × I × R × L." : "Single-phase / DC: Vd = 2 × I × R × L."}{" "}
-          Resistance from NEC Chapter 9, Table 8 at 75°C. A planning aid — verify with your AHJ.
+          Resistance from NEC Chapter 9, Table 8 at 75°C (effective resistance, power factor ≈ 1; for
+          large feeders at low power factor, AC reactance adds a few percent). A planning aid — verify with your AHJ.
         </p>
       </ResultCard>
     </div>

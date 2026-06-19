@@ -46,6 +46,12 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
         <span className="text-slate-700">{p.title}</span>
       </nav>
       <h1 className="text-3xl font-bold tracking-tight text-slate-900">{p.title}</h1>
+      <p className="mt-3 text-sm text-slate-500">
+        <time dateTime={p.date}>
+          {new Date(p.date + "T00:00:00Z").toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" })}
+        </time>
+        {" · "}{p.readMins} min read
+      </p>
       <p className="mt-2 text-slate-500">{p.description}</p>
       <div className="mt-6 space-y-4">
         {p.body.map((b, i) => {

@@ -1,7 +1,9 @@
 "use client";
 import { useState } from "react";
 import { calcDwellingLoad } from "@/lib/dwelling-load";
-import { Field, NumberInput, ResultCard, Stat, Verdict } from "./ui";
+import { Field, NumberInput, parseNum, ResultCard, Stat, Verdict } from "./ui";
+
+const nn = (v: string) => Math.max(0, parseNum(v));
 
 export default function LoadCalculator() {
   const [sqft, setSqft] = useState(2000);
@@ -21,23 +23,23 @@ export default function LoadCalculator() {
     <div className="grid gap-5 md:grid-cols-2">
       <div className="space-y-4">
         <Field label="Living area (ft²)" hint="Heated/conditioned floor area. 3 VA/ft² general load.">
-          <NumberInput value={sqft} onChange={(e) => setSqft(+e.target.value)} />
+          <NumberInput min={0} value={sqft} onChange={(e) => setSqft(nn(e.target.value))} />
         </Field>
-        <Field label="Electric range (kW)" hint="0 if gas. One range ≤12 kW counts as 8 kVA.">
-          <NumberInput value={rangeKw} onChange={(e) => setRangeKw(+e.target.value)} />
+        <Field label="Electric range (kW)" hint="Single dwelling, one range. 0 if gas. ≤12 kW counts as 8 kVA (Table 220.55).">
+          <NumberInput min={0} value={rangeKw} onChange={(e) => setRangeKw(nn(e.target.value))} />
         </Field>
         <Field label="Electric dryer (VA)" hint="0 if gas. Counted at 5000 VA minimum.">
-          <NumberInput value={dryerVa} onChange={(e) => setDryerVa(+e.target.value)} />
+          <NumberInput min={0} value={dryerVa} onChange={(e) => setDryerVa(nn(e.target.value))} />
         </Field>
         <Field label="Other fastened appliances — total VA" hint="Dishwasher, disposal, water heater, etc.">
-          <NumberInput value={fastenedApplianceVa} onChange={(e) => setFastened(+e.target.value)} />
+          <NumberInput min={0} value={fastenedApplianceVa} onChange={(e) => setFastened(nn(e.target.value))} />
         </Field>
         <Field label="Number of those appliances" hint="4 or more → 75% demand factor.">
-          <NumberInput value={fastenedApplianceCount} onChange={(e) => setCount(+e.target.value)} />
+          <NumberInput min={0} value={fastenedApplianceCount} onChange={(e) => setCount(nn(e.target.value))} />
         </Field>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Heating (VA)"><NumberInput value={heatVa} onChange={(e) => setHeat(+e.target.value)} /></Field>
-          <Field label="Air conditioning (VA)"><NumberInput value={acVa} onChange={(e) => setAc(+e.target.value)} /></Field>
+          <Field label="Heating (VA)"><NumberInput min={0} value={heatVa} onChange={(e) => setHeat(nn(e.target.value))} /></Field>
+          <Field label="Air conditioning (VA)"><NumberInput min={0} value={acVa} onChange={(e) => setAc(nn(e.target.value))} /></Field>
         </div>
       </div>
 
@@ -65,7 +67,7 @@ export default function LoadCalculator() {
 function Row({ label, value, note }: { label: string; value: number; note?: string }) {
   return (
     <div className="flex justify-between">
-      <span>{label}{note && <span className="text-slate-400"> · {note}</span>}</span>
+      <span>{label}{note && <span className="text-slate-500"> · {note}</span>}</span>
       <span className="font-medium text-slate-900">{value.toLocaleString()} VA</span>
     </div>
   );

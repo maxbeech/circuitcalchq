@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CALCS, getCalc, type CalcComponent } from "@/lib/calculators";
-import { SITE } from "@/lib/site";
+import { SITE, breadcrumbLd } from "@/lib/site";
 import { CodeBadge } from "@/components/ui";
 import VoltageDropCalculator from "@/components/VoltageDropCalculator";
 import WireSizeCalculator from "@/components/WireSizeCalculator";
@@ -10,6 +10,8 @@ import ConduitFillCalculator from "@/components/ConduitFillCalculator";
 import BoxFillCalculator from "@/components/BoxFillCalculator";
 import LoadCalculator from "@/components/LoadCalculator";
 import AmpacityTable from "@/components/AmpacityTable";
+import PowerCalculator from "@/components/PowerCalculator";
+import OhmsLawCalculator from "@/components/OhmsLawCalculator";
 
 export function generateStaticParams() {
   return CALCS.map((c) => ({ slug: c.slug }));
@@ -35,6 +37,8 @@ function renderCalc(component: CalcComponent) {
     case "box-fill": return <BoxFillCalculator />;
     case "dwelling-load": return <LoadCalculator />;
     case "ampacity-chart": return <AmpacityTable />;
+    case "power": return <PowerCalculator />;
+    case "ohms-law": return <OhmsLawCalculator />;
   }
 }
 
@@ -53,9 +57,15 @@ export default async function CalcPage({ params }: { params: Promise<{ slug: str
     })),
   };
 
+  const crumbLd = breadcrumbLd([
+    { name: "Calculators", path: "/calculators" },
+    { name: c.title, path: `/calculators/${c.slug}` },
+  ]);
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbLd) }} />
 
       <nav className="mb-4 text-sm text-slate-500">
         <Link href="/calculators" className="hover:text-slate-900">Calculators</Link>

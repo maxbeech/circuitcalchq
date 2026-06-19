@@ -6,7 +6,9 @@ export type CalcComponent =
   | "conduit-fill"
   | "box-fill"
   | "dwelling-load"
-  | "ampacity-chart";
+  | "ampacity-chart"
+  | "power"
+  | "ohms-law";
 
 export interface Calc {
   slug: string;
@@ -140,6 +142,46 @@ export const CALCS: Calc[] = [
     ],
     code: "NEC Table 310.16",
     related: ["wire-size-calculator", "voltage-drop-calculator", "conduit-fill-calculator"],
+  },
+  {
+    slug: "watts-to-amps-calculator",
+    component: "power",
+    title: "Watts to Amps Calculator",
+    metaTitle: "Watts to Amps Calculator — Amps, Watts, kVA (1Ø/3Ø/DC)",
+    keyword: "watts to amps",
+    description:
+      "Convert between watts, amps, volts and kVA for single-phase, three-phase or DC systems — with power factor. Enter what you know and get the rest instantly.",
+    intro: [
+      "Watts measure real power; amps measure current. Converting between them needs the voltage, and for AC the power factor (how in-step the current is with the voltage). This calculator handles single-phase, three-phase and DC.",
+      "Pick what you know — power (W), current (A) or apparent power (kVA) — and it returns the others. The formulas are exact: single-phase P = V × I × pf, three-phase P = √3 × V × I × pf, DC P = V × I.",
+    ],
+    faqs: [
+      { q: "How do I convert watts to amps?", a: "Divide watts by the voltage (and by the power factor for AC). Single-phase: amps = watts ÷ (volts × pf). Three-phase: amps = watts ÷ (√3 × volts × pf)." },
+      { q: "What is power factor?", a: "Power factor is the ratio of real power (watts) to apparent power (volt-amps). Resistive loads like heaters are 1.0; motors are typically 0.8–0.9. A lower power factor means more current for the same watts." },
+      { q: "Watts vs VA vs kVA?", a: "Volt-amps (VA) is apparent power — volts times amps. Watts is real power — VA times the power factor. They're equal only when the power factor is 1.0." },
+    ],
+    code: "P = V·I·pf",
+    related: ["ohms-law-calculator", "voltage-drop-calculator", "wire-size-calculator"],
+  },
+  {
+    slug: "ohms-law-calculator",
+    component: "ohms-law",
+    title: "Ohm's Law Calculator",
+    metaTitle: "Ohm's Law Calculator — Volts, Amps, Ohms & Watts",
+    keyword: "ohms law calculator",
+    description:
+      "Solve Ohm's law: enter any two of voltage, current, resistance or power and get the other two. V = I × R, P = V × I.",
+    intro: [
+      "Ohm's law ties together voltage (V), current (I) and resistance (R): V = I × R. Add power (P = V × I) and you can find any two of the four from the other two.",
+      "Enter the two values you know and this calculator solves the rest, using the exact relationships P = I²R = V²/R.",
+    ],
+    faqs: [
+      { q: "What is Ohm's law?", a: "Ohm's law states that the current through a conductor is proportional to the voltage across it and inversely proportional to its resistance: I = V ÷ R." },
+      { q: "How do I find power?", a: "Power equals voltage times current (P = V × I). You can also use P = I² × R or P = V² ÷ R when you know the resistance." },
+      { q: "What units does it use?", a: "Volts (V), amps (A), ohms (Ω) and watts (W). This calculator works in base units — enter 0.5 for 500 mA, for example." },
+    ],
+    code: "V = I·R",
+    related: ["watts-to-amps-calculator", "voltage-drop-calculator", "wire-ampacity-chart"],
   },
 ];
 

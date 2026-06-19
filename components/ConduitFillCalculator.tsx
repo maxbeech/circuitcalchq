@@ -3,7 +3,7 @@ import { useState } from "react";
 import { CONDUCTORS, sizeLabel } from "@/lib/nec-conductors";
 import { CONDUIT_LABELS, TRADE_SIZES, type ConduitType } from "@/lib/nec-conduit";
 import { calcFill, minConduit, type WireGroup } from "@/lib/conduit-fill";
-import { Field, NumberInput, ResultCard, Select, Stat, Verdict } from "./ui";
+import { Field, NumberInput, parseNum, ResultCard, Select, Stat, Verdict } from "./ui";
 
 export default function ConduitFillCalculator() {
   const [type, setType] = useState<ConduitType>("emt");
@@ -35,14 +35,14 @@ export default function ConduitFillCalculator() {
           <div className="space-y-2">
             {wires.map((w, i) => (
               <div key={i} className="flex items-center gap-2">
-                <NumberInput value={w.count} min={0} onChange={(e) => update(i, { count: Math.max(0, +e.target.value) })} className="w-20 rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900" />
-                <span className="text-slate-400">×</span>
+                <NumberInput value={w.count} min={0} onChange={(e) => update(i, { count: Math.max(0, parseNum(e.target.value)) })} className="w-20 rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900" />
+                <span className="text-slate-500">×</span>
                 <Select value={w.size} onChange={(e) => update(i, { size: e.target.value })}>
                   {CONDUCTORS.map((c) => (
                     <option key={c.size} value={c.size}>{sizeLabel(c.size)}</option>
                   ))}
                 </Select>
-                <button type="button" onClick={() => remove(i)} className="rounded-lg px-2 py-1 text-slate-400 hover:bg-slate-100 hover:text-rose-600" aria-label="Remove conductor">✕</button>
+                <button type="button" onClick={() => remove(i)} className="rounded-lg px-2 py-1 text-slate-500 hover:bg-slate-100 hover:text-rose-600" aria-label="Remove conductor">✕</button>
               </div>
             ))}
           </div>

@@ -21,7 +21,7 @@ export default function WireIndex() {
         {CONDUCTORS.map((c) => (
           <Link key={c.size} href={`/wire/${gaugeSlug(c.size)}`}
             className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm hover:border-blue-300 hover:text-blue-700">
-            {sizeLabel(c.size)} <span className="text-slate-400">· {c.amp.cu[1]} A Cu</span>
+            {sizeLabel(c.size)} <span className="text-slate-500">· {c.amp.cu[1]} A Cu @75°C</span>
           </Link>
         ))}
       </div>

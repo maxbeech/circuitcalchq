@@ -2,12 +2,18 @@
 // form controls, result cards and verdict badges.
 import type { ReactNode } from "react";
 
+// Safe numeric parse for controlled inputs: blank / invalid → 0, never NaN.
+export function parseNum(s: string): number {
+  const n = parseFloat(s);
+  return Number.isFinite(n) ? n : 0;
+}
+
 export function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
   return (
     <label className="block">
       <span className="mb-1 block text-sm font-medium text-slate-700">{label}</span>
       {children}
-      {hint && <span className="mt-1 block text-xs text-slate-400">{hint}</span>}
+      {hint && <span className="mt-1 block text-xs text-slate-500">{hint}</span>}
     </label>
   );
 }
@@ -45,10 +51,16 @@ export function ResultCard({ children }: { children: ReactNode }) {
   return <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">{children}</div>;
 }
 
+export function Notice({ children }: { children: ReactNode }) {
+  return (
+    <div className="rounded-lg bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800">{children}</div>
+  );
+}
+
 export function Stat({ label, value, sub, big }: { label: string; value: ReactNode; sub?: string; big?: boolean }) {
   return (
     <div>
-      <div className="text-xs uppercase tracking-wide text-slate-400">{label}</div>
+      <div className="text-xs uppercase tracking-wide text-slate-500">{label}</div>
       <div className={`font-bold text-slate-900 ${big ? "text-3xl" : "text-xl"}`}>{value}</div>
       {sub && <div className="text-xs text-slate-500">{sub}</div>}
     </div>

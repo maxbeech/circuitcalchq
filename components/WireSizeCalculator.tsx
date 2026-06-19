@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { sizeLabel, type Material, type TempRating } from "@/lib/nec-conductors";
 import { sizeWire } from "@/lib/wire-size";
-import { Field, NumberInput, ResultCard, SegButton, Select, Stat, Verdict } from "./ui";
+import { Field, Notice, NumberInput, parseNum, ResultCard, SegButton, Select, Stat, Verdict } from "./ui";
 
 export default function WireSizeCalculator() {
   const [loadAmps, setLoadAmps] = useState(50);
@@ -18,7 +18,7 @@ export default function WireSizeCalculator() {
     <div className="grid gap-5 md:grid-cols-2">
       <div className="space-y-4">
         <Field label="Load current (A)">
-          <NumberInput value={loadAmps} onChange={(e) => setLoadAmps(+e.target.value)} />
+          <NumberInput min={0} value={loadAmps} onChange={(e) => setLoadAmps(Math.max(0, parseNum(e.target.value)))} />
         </Field>
         <div>
           <span className="mb-1 block text-sm font-medium text-slate-700">Conductor</span>
@@ -35,10 +35,10 @@ export default function WireSizeCalculator() {
           </Select>
         </Field>
         <Field label="Ambient temperature (°C)" hint="Table 310.16 assumes 30°C.">
-          <NumberInput value={ambientC} onChange={(e) => setAmbientC(+e.target.value)} />
+          <NumberInput min={0} value={ambientC} onChange={(e) => setAmbientC(Math.max(0, parseNum(e.target.value)))} />
         </Field>
         <Field label="Current-carrying conductors in raceway">
-          <NumberInput value={ccc} onChange={(e) => setCcc(+e.target.value)} />
+          <NumberInput min={1} value={ccc} onChange={(e) => setCcc(Math.max(1, parseNum(e.target.value)))} />
         </Field>
         <label className="flex items-center gap-2 text-sm text-slate-700">
           <input type="checkbox" checked={continuous} onChange={(e) => setContinuous(e.target.checked)} className="h-4 w-4 rounded border-slate-300" />
@@ -47,7 +47,9 @@ export default function WireSizeCalculator() {
       </div>
 
       <ResultCard>
-        {r.size ? (
+        {loadAmps <= 0 ? (
+          <Notice>Enter a positive load current to size the conductor.</Notice>
+        ) : r.size ? (
           <>
             <div className="grid grid-cols-2 gap-4">
               <Stat label="Minimum wire" value={`${sizeLabel(r.size)} ${material === "cu" ? "Cu" : "Al"}`} big />

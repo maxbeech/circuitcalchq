@@ -46,11 +46,13 @@ function Footer() {
           <Link href="/calculators/conduit-fill-calculator" className="hover:text-slate-900">Conduit fill</Link>
           <Link href="/calculators/electrical-load-calculator" className="hover:text-slate-900">Load calc</Link>
           <Link href="/calculators/box-fill-calculator" className="hover:text-slate-900">Box fill</Link>
+          <Link href="/calculators/watts-to-amps-calculator" className="hover:text-slate-900">Watts to amps</Link>
+          <Link href="/calculators/ohms-law-calculator" className="hover:text-slate-900">Ohm&apos;s law</Link>
           <Link href="/calculators/wire-ampacity-chart" className="hover:text-slate-900">Ampacity chart</Link>
           <Link href="/states" className="hover:text-slate-900">NEC by state</Link>
           <Link href="/methodology" className="hover:text-slate-900">Methodology</Link>
         </div>
-        <p className="mt-4 max-w-2xl text-xs text-slate-400">
+        <p className="mt-4 max-w-2xl text-xs text-slate-500">
           {SITE.name} computes results directly from the published National Electrical Code tables
           (NFPA 70). It is a planning aid for electricians, engineers and informed DIYers — local
           amendments vary, so always confirm sizing and methods with your Authority Having

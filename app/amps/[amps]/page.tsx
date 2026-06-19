@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { sizeLabel, type Material, type TempRating } from "@/lib/nec-conductors";
 import { sizeWire } from "@/lib/wire-size";
 import { AMP_TARGETS } from "@/lib/wire-pages";
-import { SITE } from "@/lib/site";
+import { SITE, breadcrumbLd } from "@/lib/site";
 import { ResultCard, Stat } from "@/components/ui";
 
 export function generateStaticParams() {
@@ -19,6 +19,11 @@ export async function generateMetadata({ params }: { params: Promise<{ amps: str
     title: `What Size Wire for ${n} Amps? (NEC Copper & Aluminum)`,
     description: `The correct copper and aluminum wire size for a ${n} amp circuit per NEC Table 310.16 — at both 60°C and 75°C terminals — plus the breaker and ground wire.`,
     alternates: { canonical: `${SITE.url}/amps/${n}` },
+    openGraph: {
+      title: `What Size Wire for ${n} Amps?`,
+      description: `Copper & aluminum wire size for a ${n} A circuit per NEC Table 310.16.`,
+      url: `${SITE.url}/amps/${n}`,
+    },
   };
 }
 
@@ -41,8 +46,14 @@ export default async function AmpPage({ params }: { params: Promise<{ amps: stri
     { m: "Aluminum", mat: "al" },
   ];
 
+  const crumbLd = breadcrumbLd([
+    { name: "Wire sizes", path: "/wire" },
+    { name: `${n} amps`, path: `/amps/${n}` },
+  ]);
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbLd) }} />
       <nav className="mb-4 text-sm text-slate-500">
         <Link href="/wire" className="hover:text-slate-900">Wire sizes</Link>
         <span className="mx-2">/</span>

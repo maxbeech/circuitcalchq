@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { US_STATES, getState } from "@/lib/states";
 import { CALCS } from "@/lib/calculators";
-import { SITE } from "@/lib/site";
+import { SITE, breadcrumbLd } from "@/lib/site";
 
 export function generateStaticParams() {
   return US_STATES.map((s) => ({ slug: s.slug }));
@@ -17,6 +17,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: `${s.name} Electrical Code — NEC Edition & Calculators`,
     description: `${s.name} ${s.nec === "No statewide" ? "has no statewide NEC adoption (local jurisdictions set the code)" : `currently enforces the ${s.nec} NEC`}. Free voltage drop, wire size and load calculators for ${s.name} electrical permits.`,
     alternates: { canonical: `${SITE.url}/states/${s.slug}` },
+    openGraph: {
+      title: `${s.name} Electrical Code — NEC Edition & Calculators`,
+      description: `${s.name} ${s.nec === "No statewide" ? "sets electrical code locally" : `enforces the ${s.nec} NEC`}. Free NEC calculators.`,
+      url: `${SITE.url}/states/${s.slug}`,
+    },
   };
 }
 
@@ -26,8 +31,14 @@ export default async function StatePage({ params }: { params: Promise<{ slug: st
   if (!s) notFound();
   const local = s.nec === "No statewide";
 
+  const crumbLd = breadcrumbLd([
+    { name: "NEC by state", path: "/states" },
+    { name: s.name, path: `/states/${s.slug}` },
+  ]);
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbLd) }} />
       <nav className="mb-4 text-sm text-slate-500">
         <Link href="/states" className="hover:text-slate-900">NEC by state</Link>
         <span className="mx-2">/</span>
@@ -36,7 +47,7 @@ export default async function StatePage({ params }: { params: Promise<{ slug: st
       <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{s.name} electrical code</h1>
 
       <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="text-xs uppercase tracking-wide text-slate-400">Adopted NEC edition</div>
+        <div className="text-xs uppercase tracking-wide text-slate-500">Adopted NEC edition</div>
         <div className="mt-1 text-3xl font-bold text-slate-900">{local ? "No statewide adoption" : `${s.nec} NEC`}</div>
         <p className="mt-2 text-sm text-slate-600">
           {local
@@ -61,7 +72,7 @@ export default async function StatePage({ params }: { params: Promise<{ slug: st
         ))}
       </div>
 
-      <p className="mt-6 text-xs text-slate-400">
+      <p className="mt-6 text-xs text-slate-500">
         Adoption status reflects statewide tracking and can change; always verify the enforced edition
         with your Authority Having Jurisdiction.
       </p>

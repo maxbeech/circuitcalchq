@@ -20,7 +20,9 @@ export default function Blog() {
             className="block rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-blue-300 hover:shadow">
             <h2 className="text-lg font-semibold text-slate-900">{p.title}</h2>
             <p className="mt-1 text-sm text-slate-500">{p.description}</p>
-            <div className="mt-2 text-xs text-slate-400">{p.readMins} min read</div>
+            <div className="mt-2 text-xs text-slate-500">
+              {new Date(p.date + "T00:00:00Z").toLocaleDateString("en-US", { year: "numeric", month: "long", timeZone: "UTC" })} · {p.readMins} min read
+            </div>
           </Link>
         ))}
       </div>
