@@ -25,9 +25,43 @@ const proFeatures = [
   "Saved projects you can revise and re-export",
 ];
 
+const productLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: SITE.name,
+  applicationCategory: "UtilitiesApplication",
+  operatingSystem: "Any (web browser)",
+  url: SITE.url,
+  description: SITE.description,
+  offers: [
+    {
+      "@type": "Offer",
+      name: "Free calculators",
+      price: "0",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+      url: `${SITE.url}/calculators`,
+      description: "All NEC calculators, unlimited use, no account required.",
+    },
+    {
+      "@type": "Offer",
+      name: "Pro permit-ready load report",
+      price: "29",
+      priceCurrency: "USD",
+      // Checkout is env-gated and not live yet — this must stay in sync with
+      // the actual state of /api/checkout so the schema never claims a sale
+      // that can't be completed.
+      availability: "https://schema.org/PreOrder",
+      url: `${SITE.url}/pricing`,
+      description: "One-time permit-ready Article 220 load-calculation PDF with full NEC citations.",
+    },
+  ],
+};
+
 export default function Pricing() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productLd) }} />
       <div className="text-center">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Simple, honest pricing</h1>
         <p className="mx-auto mt-2 max-w-xl text-slate-600">
